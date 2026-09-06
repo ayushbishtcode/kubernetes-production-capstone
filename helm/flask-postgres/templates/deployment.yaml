@@ -24,3 +24,22 @@ spec:
 
           ports:
             - containerPort: 5006
+
+          env:
+            - name: DB_HOST
+              value: "{{ .Values.database.host }}"
+
+            - name: DB_PORT
+              value: "{{ .Values.database.port }}"
+
+            - name: DB_NAME
+              value: "{{ .Values.database.name }}"
+
+            - name: DB_USER
+              value: "{{ .Values.database.user }}"
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD

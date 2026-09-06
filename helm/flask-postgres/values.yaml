@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: kubernetes-flask
-  tag: v1
+  tag: v2
   pullPolicy: IfNotPresent
 
 service:
@@ -19,3 +19,9 @@ postgres:
 
   storage:
     size: 1Gi
+
+database:
+  host: postgres-service
+  port: 5432
+  name: employees
+  user: Ayush

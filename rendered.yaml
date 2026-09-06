@@ -1,0 +1,155 @@
+---
+# Source: flask-postgres/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+
+metadata:
+  name: postgres-secret
+
+type: Opaque
+
+stringData:
+  POSTGRES_PASSWORD: "postgres"
+
+---
+# Source: flask-postgres/templates/postgres-service.yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: postgres-service
+
+spec:
+  clusterIP: None
+
+  selector:
+    app: postgres
+
+  ports:
+    - port: 5432
+      targetPort: 5432
+
+---
+# Source: flask-postgres/templates/service.yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: flask-service
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: flask
+
+  ports:
+    - port: 5006
+      targetPort: 5006
+
+---
+# Source: flask-postgres/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: flask-deployment
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: flask
+
+  template:
+    metadata:
+      labels:
+        app: flask
+
+    spec:
+      containers:
+        - name: flask
+          image: "kubernetes-flask:v1"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5006
+
+          env:
+            - name: DB_HOST
+              value: "postgres-service"
+
+            - name: DB_PORT
+              value: "5432"
+
+            - name: DB_NAME
+              value: "employees"
+
+            - name: DB_USER
+              value: "Ayush"
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+---
+# Source: flask-postgres/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: postgres
+
+spec:
+  serviceName: postgres-service
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: postgres
+
+  template:
+    metadata:
+      labels:
+        app: postgres
+
+    spec:
+      containers:
+        - name: postgres
+
+          image: "postgres:16"
+
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_DB
+              value: "employees"
+
+            - name: POSTGRES_USER
+              value: "Ayush"
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 1Gi
