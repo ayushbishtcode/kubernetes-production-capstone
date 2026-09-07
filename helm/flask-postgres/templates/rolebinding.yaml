@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "flask-postgres.fullname" . }}-flask
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "flask-postgres.fullname" . }}-flask
+roleRef:
+  kind: Role
+  name: {{ include "flask-postgres.fullname" . }}-flask
+  apiGroup: rbac.authorization.k8s.io

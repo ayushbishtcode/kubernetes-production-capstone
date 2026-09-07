@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 
 metadata:
-  name: postgres
+  name: {{ include "flask-postgres.fullname" . }}-postgres
 
 spec:
-  serviceName: postgres-service
+  serviceName: {{ include "flask-postgres.fullname" . }}-postgres-service
   replicas: 1
 
   selector:
@@ -36,7 +36,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: {{ include "flask-postgres.fullname" . }}-secret
                   key: POSTGRES_PASSWORD
 
           volumeMounts:

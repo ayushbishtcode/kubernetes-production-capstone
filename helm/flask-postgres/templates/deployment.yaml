@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: flask-deployment
+  name: {{ include "flask-postgres.fullname" . }}-flask
 
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -27,7 +27,7 @@ spec:
 
           env:
             - name: DB_HOST
-              value: "{{ .Values.database.host }}"
+              value: '{{ include "flask-postgres.fullname" . }}-postgres-service'
 
             - name: DB_PORT
               value: "{{ .Values.database.port }}"
@@ -41,5 +41,5 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: {{ include "flask-postgres.fullname" . }}-secret
                   key: POSTGRES_PASSWORD

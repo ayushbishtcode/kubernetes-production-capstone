@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: kubernetes-flask
+  tag: v3
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5006
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16"
+
+  database: employees
+  username: Ayush
+
+  storage:
+    size: 2Gi
+
+database:
+  host: postgres-service
+  port: 5432
+  name: employees
+  user: Ayush
