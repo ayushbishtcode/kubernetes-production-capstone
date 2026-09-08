@@ -17,6 +17,9 @@ spec:
         app: flask
 
     spec:
+  
+      serviceAccountName: {{ include "flask-postgres.fullname" . }}-flask
+      
       containers:
         - name: flask
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

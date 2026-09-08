@@ -19,6 +19,7 @@ postgres:
 
   storage:
     size: 1Gi
+    storageClass: gp2
 
 database:
   host: postgres-service
