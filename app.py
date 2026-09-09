@@ -18,7 +18,7 @@ def get_db_connection():
 
 @app.route("/")
 def home():
-    return "Flask application is running!"
+    return "Flask application v2 is running on EKS!"
 
 
 @app.route("/db")
