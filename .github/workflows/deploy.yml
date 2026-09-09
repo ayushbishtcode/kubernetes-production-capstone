@@ -1,0 +1,65 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: kubernetes-flask
+  EKS_CLUSTER: kubernetes-production
+  NAMESPACE: production
+  HELM_RELEASE: eks-prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::374894298799:role/GitHubActionsEKSDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+          docker push \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name $EKS_CLUSTER \
+            --region $AWS_REGION
+
+      - name: Deploy with Helm
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          helm upgrade --install $HELM_RELEASE ./helm/flask-postgres \
+            --namespace $NAMESPACE \
+            --create-namespace \
+            --set image.repository=$ECR_REGISTRY/$ECR_REPOSITORY \
+            --set image.tag=$IMAGE_TAG \
+            --wait
