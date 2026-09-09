@@ -491,6 +491,6 @@ The GitHub repository and source code can remain after AWS infrastructure is rem
 - Continuous deployment
 - Production troubleshooting
 
-## Interview Summary
+## Summary
 
 > Built and deployed a Flask/PostgreSQL production-style application on Amazon EKS using Helm, ECR and GitHub Actions. GitHub authenticates to AWS through OIDC, Docker images are tagged with Git commit SHAs, and Helm performs automated deployments. PostgreSQL runs as a StatefulSet with persistent EBS storage, Flask uses HPA for scaling, Kubernetes RBAC applies least privilege, and a NetworkPolicy restricts PostgreSQL access to Flask Pods.
